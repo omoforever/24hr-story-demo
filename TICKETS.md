@@ -2,14 +2,15 @@
 
 ## Active
 
-- [ ] **Test pass** — review coverage against TESTING.md. Mostly absorbed already: every ticket shipped with its tests (66 total). Remaining gaps: `app/page.tsx` has only a render smoke test, and there's no end-to-end flow test.
+(none — project complete)
 
 ## Backlog
 
-(empty)
+- [ ] **Page-level and end-to-end tests** — deferred, not abandoned. `app/page.tsx` has only a render smoke test, and there's no end-to-end flow test. Both need `addStory`, which calls canvas, so they'd require stubbing `lib/image.ts` or adding Playwright. Pick this up if the project is revived.
 
 ## Done
 
+- [2026-09-08] **Test pass** — closed on review rather than new tests. Coverage was absorbed ticket by ticket (66 tests); the two remaining gaps are recorded as backlog and as an exemption in TESTING.md
 - [2026-09-08] **Responsive pass** — frame capped by height so landscape stays phone-shaped, safe-area inset for notched devices. Verified 320px → wide desktop, both orientations
 - [2026-09-08] **Expiry enforcement live** — 60s interval + `visibilitychange` re-check in `useStories`, identity-preserving refresh, viewer closes if the watched story expires. 8 tests
 - [2026-09-08] **Swipe gestures** — `useStorySwipe` on Motion's drag: left/right navigate, down dismisses, distance-or-velocity threshold, click suppression so a swipe doesn't also fire a tap. 12 unit tests

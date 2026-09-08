@@ -4,9 +4,42 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Feature complete. Every flow in PRODUCT.md works and has been verified on a real phone and a
-laptop, portrait and landscape, 320px to full desktop width. 66 tests green. All that's left is
-the **Test pass** — a coverage review rather than a build, since each ticket shipped with tests.
+**Complete.** Every flow in PRODUCT.md works and has been verified on a real phone and a laptop,
+portrait and landscape, 320px to full desktop width. 66 tests green; `tsc`, lint and build clean.
+Ten tickets, seven PRs, all merged to `main`.
+
+Against the roadmap.sh brief: tray with "+" tile, base64 in localStorage, 24h expiry, swipe
+navigation, responsive, 1080×1920 cap — all met.
+
+Not done, deliberately: page-level and end-to-end tests (see TICKETS.md backlog and the TESTING.md
+exemption), and there's no README on the repo.
+
+---
+
+## 2026-09-08 — Test pass, and wrapping up
+
+Closed on review rather than by writing more tests. Coverage was absorbed ticket by ticket, so
+the layers that carry the logic — storage, expiry, swipe thresholds, playback timing, tray,
+viewer — have 66 unit and component tests between them.
+
+The two gaps are both the same gap: `app/page.tsx` beyond its smoke test, and the end-to-end
+flow, each need `addStory`, which calls canvas. They inherit `lib/image.ts`'s exemption — testing
+them means stubbing that module or adding Playwright. Recorded as backlog rather than written off.
+
+### What this project turned out to be about
+
+Very little of the difficulty was where the tickets suggested it would be. The hard parts were:
+
+- **Things that only break on a real device.** `crypto.randomUUID` being undefined outside a
+  secure context, iOS claiming vertical drags before Motion sees them, safe-area insets, and a
+  dev server that had to be restarted to read its own config.
+- **Gesture collisions.** A swipe starting and ending inside a tap zone fires a click too — the
+  actual work in the swipe ticket was suppressing that, not detecting the swipe.
+- **Knowing when a lint rule is right.** `set-state-in-effect` fired twice: once wrongly (the
+  hydration read, suppressed with reasoning) and once rightly (syncing index to a prop, which had
+  a better pattern). Same rule, opposite conclusions.
+- **Testing time.** Injecting `now` everywhere instead of calling `Date.now()` internally is what
+  made expiry and playback testable at all, and it was decided in the second ticket.
 
 ---
 

@@ -21,6 +21,12 @@ Every code file gets a test, using whichever library fits that file's layer. Tes
   mocking the canvas API or pulling in the `canvas` package. Neither is worth it for one file on
   a project this size. Verified by eye instead: upload a landscape photo, a portrait one, and a
   phone photo (EXIF rotation), and confirm each looks right in the viewer.
+- `app/page.tsx` beyond a render smoke test, and the end-to-end flow test — [2026-09-08] both
+  exercise `addStory`, which calls canvas, so both inherit the exemption above: they'd need
+  `lib/image.ts` stubbed or Playwright added. Every flow was verified manually on a real phone
+  and a laptop instead. Logged in TICKETS.md backlog rather than written off — the layers
+  underneath (storage, expiry, swipe, playback, tray, viewer) are covered by 66 unit and
+  component tests.
 
 ## Tools
 
