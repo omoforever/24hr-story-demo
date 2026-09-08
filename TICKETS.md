@@ -2,15 +2,15 @@
 
 ## Active
 
-- [ ] **Swipe gestures** — custom swipe handling for the viewer (left/right navigate, down closes)
+- [ ] **Expiry enforcement live** — interval-based re-check while app is open, not just on load
 
 ## Backlog
-- [ ] **Expiry enforcement live** — interval-based re-check while app is open, not just on load
 - [ ] **Responsive pass** — mobile-first, confirm desktop degrades to centered phone-aspect viewer
 - [ ] **Test pass** — fill in coverage per TESTING.md across all of the above
 
 ## Done
 
+- [2026-09-08] **Swipe gestures** — `useStorySwipe` on Motion's drag: left/right navigate, down dismisses, distance-or-velocity threshold, click suppression so a swipe doesn't also fire a tap. 12 unit tests
 - [2026-09-08] **Story viewer navigation** — `useStoryPlayback` (index + 5s auto-advance), `StoryTapZones`, Motion-driven progress fill, viewer takes list + start index. 14 RTL tests
 - [2026-09-08] **Story viewer (static)** — full-screen `StoryViewer` on `viewerTheme`, `StoryProgressBar`, close button, phone-shaped frame on desktop. 5 RTL tests
 - [2026-09-08] **Add story flow** — picker → resize/encode → save → tray updates, with `StorageFullError` surfaced in a snackbar
