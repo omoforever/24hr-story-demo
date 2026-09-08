@@ -2,13 +2,15 @@
 
 ## Active
 
-- [ ] **Responsive pass** — mobile-first, confirm desktop degrades to centered phone-aspect viewer
+- [ ] **Test pass** — review coverage against TESTING.md. Mostly absorbed already: every ticket shipped with its tests (66 total). Remaining gaps: `app/page.tsx` has only a render smoke test, and there's no end-to-end flow test.
 
 ## Backlog
-- [ ] **Test pass** — fill in coverage per TESTING.md across all of the above
+
+(empty)
 
 ## Done
 
+- [2026-09-08] **Responsive pass** — frame capped by height so landscape stays phone-shaped, safe-area inset for notched devices. Verified 320px → wide desktop, both orientations
 - [2026-09-08] **Expiry enforcement live** — 60s interval + `visibilitychange` re-check in `useStories`, identity-preserving refresh, viewer closes if the watched story expires. 8 tests
 - [2026-09-08] **Swipe gestures** — `useStorySwipe` on Motion's drag: left/right navigate, down dismisses, distance-or-velocity threshold, click suppression so a swipe doesn't also fire a tap. 12 unit tests
 - [2026-09-08] **Story viewer navigation** — `useStoryPlayback` (index + 5s auto-advance), `StoryTapZones`, Motion-driven progress fill, viewer takes list + start index. 14 RTL tests

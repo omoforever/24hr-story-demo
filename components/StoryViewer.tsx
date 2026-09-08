@@ -81,9 +81,11 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
               sx={{
                 position: "relative",
                 width: "100%",
-                maxWidth: FRAME_MAX_WIDTH,
+                // Capped by height as well as width: `max-height` would otherwise win against
+                // `aspect-ratio` and flatten the frame into a landscape box on a short viewport.
+                // dvh rather than vh so mobile browser chrome collapsing doesn't clip it.
+                maxWidth: `min(${FRAME_MAX_WIDTH}px, calc(100dvh * 9 / 16))`,
                 aspectRatio: FRAME_ASPECT_RATIO,
-                maxHeight: "100%",
                 backgroundColor: "common.black",
                 // Without this the browser's own scroll/refresh gestures win before Motion
                 // ever sees the drag.
@@ -120,7 +122,9 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
                   right: 0,
                   zIndex: 1,
                   px: 3,
-                  pt: 3,
+                  // The layout sets viewportFit: "cover" so the viewer reaches under the notch;
+                  // without the inset the progress bar sits beneath the status bar.
+                  pt: "calc(12px + env(safe-area-inset-top))",
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
