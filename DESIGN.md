@@ -41,3 +41,9 @@ Near-black background, image centered/contained (never cropped oddly — respect
 ## Patterns log
 
 Log established patterns here as they're built (e.g. exact tap-zone split, progress bar segment styling) so the viewer stays consistent if more story types are added later.
+
+**[2026-09-08] Tray avatar sizing** — `AVATAR_SIZE = 64` in `components/storyTrayLayout.ts`, shared by the add tile and the story avatars. Ring adds `2px` padding plus a `2px` background-coloured inner border, so the outer circle is 72px. Row gap is `spacing(3)` = 12px.
+
+**[2026-09-08] Unseen ring** — `linear-gradient(45deg, #f09433, #dc2743, #bc1888)` drawn as a padded background behind the thumbnail, since CSS borders can't take a gradient. Seen state swaps it for a flat `divider` colour. Seen-tracking itself is not wired yet — `StoryAvatar` takes `isSeen`, nothing passes it until the viewer lands.
+
+**[2026-09-08] Tray motion** — new avatars enter with `opacity 0→1` and `scale 0.8→1` over 200ms, wrapped in `AnimatePresence` with `initial={false}` so existing stories don't animate on page load. The exit variant is what makes expiring stories fade out rather than vanish.
