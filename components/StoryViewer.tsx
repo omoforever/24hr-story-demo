@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "motion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
@@ -44,6 +45,12 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
   // The list can shrink underneath the viewer when a story expires mid-view, so the index is
   // never assumed to still be in range.
   const story = isOpen ? stories[index] : undefined;
+
+  // Dismiss rather than silently jumping to whatever story now sits at this index — landing on
+  // something you didn't choose is worse than the viewer closing.
+  useEffect(() => {
+    if (isOpen && !story) onClose();
+  }, [isOpen, story, onClose]);
 
   return (
     <ThemeProvider theme={viewerTheme}>
