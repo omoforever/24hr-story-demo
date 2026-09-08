@@ -46,4 +46,8 @@ Log established patterns here as they're built (e.g. exact tap-zone split, progr
 
 **[2026-09-08] Unseen ring** — `linear-gradient(45deg, #f09433, #dc2743, #bc1888)` drawn as a padded background behind the thumbnail, since CSS borders can't take a gradient. Seen state swaps it for a flat `divider` colour. Seen-tracking itself is not wired yet — `StoryAvatar` takes `isSeen`, nothing passes it until the viewer lands.
 
+**[2026-09-08] Viewer frame** — one set of styles for both breakpoints: `width: 100%`, `maxWidth: 420`, `aspectRatio: 9/16`, centred on `common.black`. The cap never binds below 420px, so mobile is full-screen and desktop collapses to a phone-shaped frame without a `useMediaQuery` branch. Image is `objectFit: contain` — never `cover`, which would crop against the 1080×1920 work `image.ts` does.
+
+**[2026-09-08] Progress bar** — segments are `height: 3`, fully rounded, `spacing(1)` = 4px apart, on a `rgba(255,255,255,0.35)` track with a `common.white` fill. Fill is a nested box driven by width percentage, so a timer can animate it linearly. Past segments render full, future empty, active partial. Bar and close button share one absolutely-positioned row so they can't overlap on narrow screens.
+
 **[2026-09-08] Tray motion** — new avatars enter with `opacity 0→1` and `scale 0.8→1` over 200ms, wrapped in `AnimatePresence` with `initial={false}` so existing stories don't animate on page load. The exit variant is what makes expiring stories fade out rather than vanish.
