@@ -1,24 +1,19 @@
 "use client";
 
+import { motion } from "motion/react";
 import Box from "@mui/material/Box";
 
 type StoryProgressBarProps = {
   count: number;
   activeIndex: number;
-  /** How far through the active story we are, 0 to 1. */
-  progress?: number;
+  /** When set, the active segment fills over this many ms. Omit to render it full. */
+  durationMs?: number;
 };
-
-function fillFor(index: number, activeIndex: number, progress: number): number {
-  if (index < activeIndex) return 1;
-  if (index > activeIndex) return 0;
-  return progress;
-}
 
 export function StoryProgressBar({
   count,
   activeIndex,
-  progress = 1,
+  durationMs,
 }: StoryProgressBarProps) {
   return (
     <Box
@@ -40,12 +35,18 @@ export function StoryProgressBar({
             overflow: "hidden",
           }}
         >
-          <Box
-            sx={{
-              width: `${fillFor(index, activeIndex, progress) * 100}%`,
-              height: "100%",
-              backgroundColor: "common.white",
-            }}
+          <motion.div
+            // Keyed on the active story so the fill restarts from empty on every advance,
+            // rather than animating across from where the previous segment left off.
+            key={`${index}-${activeIndex}`}
+            initial={{ width: index === activeIndex && durationMs ? "0%" : undefined }}
+            animate={{ width: index <= activeIndex ? "100%" : "0%" }}
+            transition={
+              index === activeIndex && durationMs
+                ? { duration: durationMs / 1000, ease: "linear" }
+                : { duration: 0 }
+            }
+            style={{ height: "100%", backgroundColor: "white" }}
           />
         </Box>
       ))}

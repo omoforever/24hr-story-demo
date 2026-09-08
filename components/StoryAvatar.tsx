@@ -14,7 +14,7 @@ const UNSEEN_RING = "linear-gradient(45deg, #f09433, #dc2743, #bc1888)";
 
 type StoryAvatarProps = {
   story: Story;
-  onOpen?: (story: Story) => void;
+  onOpen?: () => void;
   isSeen?: boolean;
 };
 
@@ -23,7 +23,7 @@ export function StoryAvatar({ story, onOpen, isSeen = false }: StoryAvatarProps)
 
   return (
     <ButtonBase
-      onClick={() => onOpen?.(story)}
+      onClick={onOpen}
       aria-label="Open story"
       sx={{ borderRadius: "50%", flexShrink: 0 }}
     >

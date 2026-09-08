@@ -50,4 +50,8 @@ Log established patterns here as they're built (e.g. exact tap-zone split, progr
 
 **[2026-09-08] Progress bar** — segments are `height: 3`, fully rounded, `spacing(1)` = 4px apart, on a `rgba(255,255,255,0.35)` track with a `common.white` fill. Fill is a nested box driven by width percentage, so a timer can animate it linearly. Past segments render full, future empty, active partial. Bar and close button share one absolutely-positioned row so they can't overlap on narrow screens.
 
+**[2026-09-08] Tap zones** — `flex: 1` previous / `flex: 2` next, as two invisible `ButtonBase` elements filling the frame. Real buttons rather than one div with click-coordinate maths, so keyboard and screen-reader users get "Previous story" / "Next story". The header row (progress bar + close) carries `zIndex: 1` to sit above them, otherwise the zones swallow taps on the close button.
+
+**[2026-09-08] Story duration** — `STORY_DURATION_MS = 5000`, Instagram's pacing. The active progress segment animates 0→100% linearly over it, keyed on the active index so it restarts from empty on every advance rather than sliding across from the previous segment.
+
 **[2026-09-08] Tray motion** — new avatars enter with `opacity 0→1` and `scale 0.8→1` over 200ms, wrapped in `AnimatePresence` with `initial={false}` so existing stories don't animate on page load. The exit variant is what makes expiring stories fade out rather than vanish.

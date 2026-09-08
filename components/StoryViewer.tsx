@@ -7,7 +7,9 @@ import IconButton from "@mui/material/IconButton";
 import { ThemeProvider } from "@mui/material/styles";
 import { Story } from "@/types/story";
 import { viewerTheme } from "@/app/theme";
+import { STORY_DURATION_MS, useStoryPlayback } from "@/hooks/useStoryPlayback";
 import { StoryProgressBar } from "./StoryProgressBar";
+import { StoryTapZones } from "./StoryTapZones";
 
 // Desktop gets a phone-shaped frame rather than a stretched-out image (DESIGN.md); on mobile the
 // max-width never binds, so the same styles give a genuinely full-screen viewer.
@@ -15,15 +17,30 @@ const FRAME_MAX_WIDTH = 420;
 const FRAME_ASPECT_RATIO = "9 / 16";
 
 type StoryViewerProps = {
-  story: Story | null;
+  stories: Story[];
+  /** Index the viewer opened on, or null when it is closed. */
+  startIndex: number | null;
   onClose: () => void;
 };
 
-export function StoryViewer({ story, onClose }: StoryViewerProps) {
+export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) {
+  const isOpen = startIndex !== null;
+
+  const { index, goNext, goPrevious } = useStoryPlayback({
+    count: stories.length,
+    startIndex: startIndex ?? 0,
+    isActive: isOpen,
+    onExhausted: onClose,
+  });
+
+  // The list can shrink underneath the viewer when a story expires mid-view, so the index is
+  // never assumed to still be in range.
+  const story = isOpen ? stories[index] : undefined;
+
   return (
     <ThemeProvider theme={viewerTheme}>
       <Dialog
-        open={story !== null}
+        open={isOpen}
         onClose={onClose}
         fullScreen
         aria-label="Story viewer"
@@ -62,12 +79,17 @@ export function StoryViewer({ story, onClose }: StoryViewerProps) {
                 }}
               />
 
+              <StoryTapZones onPrevious={goPrevious} onNext={goNext} />
+
+              {/* Above the tap zones, which cover the whole frame and would otherwise swallow
+                  taps on the close button. */}
               <Box
                 sx={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   right: 0,
+                  zIndex: 1,
                   px: 3,
                   pt: 3,
                   display: "flex",
@@ -75,7 +97,11 @@ export function StoryViewer({ story, onClose }: StoryViewerProps) {
                   gap: 2,
                 }}
               >
-                <StoryProgressBar count={1} activeIndex={0} />
+                <StoryProgressBar
+                  count={stories.length}
+                  activeIndex={index}
+                  durationMs={STORY_DURATION_MS}
+                />
 
                 <IconButton
                   onClick={onClose}

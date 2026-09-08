@@ -4,9 +4,43 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Post a photo, see it in the tray, tap to open it full-screen, close it. Survives a reload.
-Verified on laptop and phone. 37 tests green. The viewer shows one story with no navigation yet —
-next up: **Story viewer navigation** (tap zones, auto-advance, sequencing).
+The core loop works: post a photo, tap it, watch the sequence auto-advance with tap zones for
+prev/next, viewer closes off the end. Survives a reload. Verified on laptop and phone.
+46 tests green. Next up: **Swipe gestures**.
+
+---
+
+## 2026-09-08 — Story viewer navigation
+
+`useStoryPlayback` + `StoryTapZones`, and the viewer now takes the whole list plus a start index
+rather than a single story. Nine files: two new, seven modified — four of those are the prop
+change rippling through tray, avatar and page.
+
+- **5s per story**, Instagram's duration. DESIGN.md doesn't name one.
+- **Progress fill is Motion-driven, not React state.** Pushing a 0-1 number through state every
+  frame is ~60 renders/sec for a cosmetic fill, so `StoryProgressBar` takes `durationMs` and
+  animates outside React. Cost: the fill isn't readable from tests, so auto-advance is asserted
+  through the timer and the resulting image instead.
+- **Timer restarts on every index change**, so tapping forward early resets the full 5s rather
+  than inheriting the remainder. There's a test for exactly this — advance 4500ms, tap, advance
+  4500ms, expect story 2 not 3.
+- **Back on the first story holds**; only running off the end closes the viewer (PRODUCT.md).
+- **The index follows `startIndex` by adjusting during render**, not in an effect. React's
+  documented pattern for this — an effect paints the previous story for a frame first. This
+  replaced a first attempt that the `set-state-in-effect` rule correctly rejected.
+
+Snags:
+
+- **Fake timers hang every `userEvent` interaction**, because MUI's Dialog transition never
+  settles under them. Seven tests failed this way before scoping fake timers to the auto-advance
+  block and using `fireEvent` elsewhere.
+- **`tsc` can't catch a changed callback signature in tests** — `vi.fn()` accepts anything, so the
+  tray's `toHaveBeenCalledWith(story)` compiled fine and only failed at runtime. The other six
+  files were caught by the compiler.
+
+Process note: the whole ticket got written before review rather than one file at a time. Walked
+back through all nine afterwards, but that isn't the same thing — approving a plan isn't
+approving the code.
 
 ---
 
