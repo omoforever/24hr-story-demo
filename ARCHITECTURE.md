@@ -92,6 +92,9 @@ passed as a prop across the server/client edge.
 | `components/AddStoryButton.tsx` | "+" tile wrapping a hidden file input |
 | `components/storyTrayLayout.ts` | Shared `AVATAR_SIZE` so the tile and avatars stay aligned |
 | `components/StoryTray.test.tsx` | RTL tests covering all three tray components |
+| `components/StoryViewer.tsx` | Full-screen Dialog on `viewerTheme` — image, progress bar, close |
+| `components/StoryProgressBar.tsx` | Segmented bar, one segment per story, partial fill on the active one |
+| `components/StoryViewer.test.tsx` | RTL tests — open/closed, image, close button, Escape, aria |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

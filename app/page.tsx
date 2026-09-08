@@ -7,12 +7,15 @@ import Container from "@mui/material/Container";
 import Snackbar from "@mui/material/Snackbar";
 import Typography from "@mui/material/Typography";
 import { StoryTray } from "@/components/StoryTray";
+import { StoryViewer } from "@/components/StoryViewer";
 import { useStories } from "@/hooks/useStories";
+import { Story } from "@/types/story";
 
 export default function Home() {
   const { stories, addStory, isLoaded } = useStories();
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openStory, setOpenStory] = useState<Story | null>(null);
 
   async function handleAddStory(file: File) {
     setIsBusy(true);
@@ -43,13 +46,20 @@ export default function Home() {
         </Typography>
       </Box>
 
-      <StoryTray stories={stories} onAddStory={handleAddStory} isBusy={isBusy} />
+      <StoryTray
+        stories={stories}
+        onAddStory={handleAddStory}
+        onOpenStory={setOpenStory}
+        isBusy={isBusy}
+      />
 
       {isLoaded && stories.length === 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ px: 4, py: 2 }}>
           No stories yet — tap Add to post one.
         </Typography>
       )}
+
+      <StoryViewer story={openStory} onClose={() => setOpenStory(null)} />
 
       <Snackbar
         open={error !== null}

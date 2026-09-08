@@ -4,9 +4,34 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-You can post a photo and see it in the tray, and it survives a reload. Verified on a real phone.
-32 tests green. Tapping an avatar does nothing yet — that's the viewer. Next up: **Story viewer
-(static)**.
+Post a photo, see it in the tray, tap to open it full-screen, close it. Survives a reload.
+Verified on laptop and phone. 37 tests green. The viewer shows one story with no navigation yet —
+next up: **Story viewer navigation** (tap zones, auto-advance, sequencing).
+
+---
+
+## 2026-09-08 — Story viewer (static)
+
+`StoryProgressBar` and `StoryViewer`, wired to the tray through `openStory` state on the page.
+
+- **MUI `Dialog`, not a hand-rolled fixed `Box`.** Brings focus trapping, Escape-to-close and
+  background scroll lock, all of which are fiddly to get right by hand. There's a test pinning
+  Escape specifically, so a later refactor can't quietly drop it.
+- **`viewerTheme` is finally in use** — the Dialog gets its own `ThemeProvider`, which is what
+  the two-theme decision back in the scaffold was for.
+- **One set of styles covers both breakpoints.** The frame is `width: 100%` with `maxWidth: 420`
+  and a 9/16 aspect ratio: on a phone the cap never binds so it's genuinely full-screen, on
+  desktop it collapses to a centred phone-shaped frame. No `useMediaQuery` branch.
+- **`objectFit: contain`, never `cover`** — cropping here would undo the aspect-ratio work
+  `image.ts` does.
+- **Progress bar built for N segments** though this ticket only ever passes one at full. DESIGN.md
+  specifies one segment per story, so ticket 7's timer only has to drive `progress` 0→1.
+
+Note: content is guarded on `story &&`, not just the Dialog's `open` prop — Dialog keeps children
+mounted through its close transition, so the frame would null-deref on close without it.
+
+`slotProps.paper` is MUI v9's replacement for `PaperProps`; most examples online still show the
+deprecated form.
 
 ---
 
