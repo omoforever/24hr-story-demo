@@ -4,9 +4,37 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-The core loop works: post a photo, tap it, watch the sequence auto-advance with tap zones for
-prev/next, viewer closes off the end. Survives a reload. Verified on laptop and phone.
-46 tests green. Next up: **Swipe gestures**.
+Everything in the core product works: post a photo, tap or swipe through the sequence, auto-
+advance, swipe down to dismiss, survives a reload, expires at 24h on read. Verified on laptop and
+phone. 58 tests green. Two tickets left: **Expiry enforcement live** and the **Responsive pass**.
+
+---
+
+## 2026-09-08 — Swipe gestures
+
+`hooks/useStorySwipe.ts` plus wiring in the viewer and tap zones.
+
+- **Built on Motion's `drag`, not raw pointer events.** A deliberate change to DESIGN.md's
+  original "custom swipe" rule, now recorded there. Motion was already a dependency, so nothing
+  new was added, and its elastic drag and velocity tracking would otherwise have been
+  reimplemented by hand. What a gesture *means* is still custom.
+- **Threshold is 80px of travel OR 500 velocity.** Distance alone makes a fast flick feel broken;
+  velocity alone loses a slow deliberate drag.
+- **Dominant axis wins**, so a diagonal resolves to one intent instead of firing both navigate
+  and dismiss.
+- **Only downward dismisses** — upward is deliberately inert, leaving room for a swipe-up action.
+
+The real problem in this ticket wasn't the swipe, it was the collision: a swipe starts and ends
+inside the tap zones, so the browser fires a click too and you'd swipe *and* advance. Solved with
+a `didDragRef` set on drag start — Motion only fires that past its own movement threshold, so a
+genuine tap never sets it — cleared on a `setTimeout(0)` because the event order is `pointerup` →
+`dragEnd` → `click`.
+
+`touchAction: "none"` on the frame is load-bearing: without it iOS claims vertical drags for
+scroll and pull-to-refresh before Motion ever sees them, and swipe-to-close just bounces the page.
+
+Tests call the hook's drag handler with a synthetic `PanInfo` rather than simulating drags
+through Motion in jsdom — no mocking, and it pins the thresholds that were tuned by feel.
 
 ---
 

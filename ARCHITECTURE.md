@@ -103,6 +103,8 @@ passed as a prop across the server/client edge.
 | `components/StoryViewer.test.tsx` | RTL tests — open/closed, navigation, auto-advance, aria |
 | `components/StoryTapZones.tsx` | Invisible prev/next targets over the frame, 1:2 flex split |
 | `hooks/useStoryPlayback.ts` | Viewer index + 5s auto-advance timer, `STORY_DURATION_MS` |
+| `hooks/useStorySwipe.ts` | Reads Motion drag end into navigate/dismiss, plus click suppression |
+| `hooks/useStorySwipe.test.ts` | Unit tests — direction, thresholds, diagonals, click suppression |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
@@ -8,6 +9,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Story } from "@/types/story";
 import { viewerTheme } from "@/app/theme";
 import { STORY_DURATION_MS, useStoryPlayback } from "@/hooks/useStoryPlayback";
+import { useStorySwipe } from "@/hooks/useStorySwipe";
 import { StoryProgressBar } from "./StoryProgressBar";
 import { StoryTapZones } from "./StoryTapZones";
 
@@ -33,6 +35,12 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
     onExhausted: onClose,
   });
 
+  const { handleDragStart, handleDragEnd, shouldIgnoreClick } = useStorySwipe({
+    onPrevious: goPrevious,
+    onNext: goNext,
+    onDismiss: onClose,
+  });
+
   // The list can shrink underneath the viewer when a story expires mid-view, so the index is
   // never assumed to still be in range.
   const story = isOpen ? stories[index] : undefined;
@@ -56,6 +64,13 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
             }}
           >
             <Box
+              component={motion.div}
+              drag
+              dragSnapToOrigin
+              dragElastic={0.5}
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
               sx={{
                 position: "relative",
                 width: "100%",
@@ -63,6 +78,9 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
                 aspectRatio: FRAME_ASPECT_RATIO,
                 maxHeight: "100%",
                 backgroundColor: "common.black",
+                // Without this the browser's own scroll/refresh gestures win before Motion
+                // ever sees the drag.
+                touchAction: "none",
               }}
             >
               <Box
@@ -79,7 +97,11 @@ export function StoryViewer({ stories, startIndex, onClose }: StoryViewerProps) 
                 }}
               />
 
-              <StoryTapZones onPrevious={goPrevious} onNext={goNext} />
+              <StoryTapZones
+                onPrevious={goPrevious}
+                onNext={goNext}
+                shouldIgnoreClick={shouldIgnoreClick}
+              />
 
               {/* Above the tap zones, which cover the whole frame and would otherwise swallow
                   taps on the close button. */}

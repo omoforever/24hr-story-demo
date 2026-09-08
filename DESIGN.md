@@ -14,7 +14,9 @@ MUI v9 for structural pieces (Dialog/Modal for the full-screen viewer, IconButto
 
 ## Motion
 
-Motion v12, used sparingly:
+**[revised 2026-09-08]** The original rule here was "custom swipe, no carousel library". That still holds for carousels — there is none — but swipe itself is now built on Motion's `drag` gestures rather than raw pointer events. Motion was already a dependency for transitions, so this adds nothing new, and it brings elastic drag and velocity tracking that hand-rolled `pointermove` handling would have had to reimplement. The decision of *what a gesture means* stays custom, in `hooks/useStorySwipe.ts`.
+
+Motion v13, used sparingly:
 - Tray: new story avatar enters with a small scale/fade
 - Viewer: story-to-story transitions on swipe/advance (slide), progress bar fill is a linear animation tied to story duration
 - Keep transitions snappy (150-250ms) — Stories is a fast-consumption UI, animation shouldn't slow it down
@@ -51,6 +53,8 @@ Log established patterns here as they're built (e.g. exact tap-zone split, progr
 **[2026-09-08] Progress bar** — segments are `height: 3`, fully rounded, `spacing(1)` = 4px apart, on a `rgba(255,255,255,0.35)` track with a `common.white` fill. Fill is a nested box driven by width percentage, so a timer can animate it linearly. Past segments render full, future empty, active partial. Bar and close button share one absolutely-positioned row so they can't overlap on narrow screens.
 
 **[2026-09-08] Tap zones** — `flex: 1` previous / `flex: 2` next, as two invisible `ButtonBase` elements filling the frame. Real buttons rather than one div with click-coordinate maths, so keyboard and screen-reader users get "Previous story" / "Next story". The header row (progress bar + close) carries `zIndex: 1` to sit above them, otherwise the zones swallow taps on the close button.
+
+**[2026-09-08] Swipe** — the frame is a draggable `motion.div` with `dragSnapToOrigin`, all-zero `dragConstraints` and `dragElastic: 0.5`, so it rubber-bands and springs back; the drag is only ever a gesture reading, never a position change. A swipe registers past **80px of travel or 500 velocity** — distance alone makes a fast flick feel broken, velocity alone loses a slow deliberate drag. The dominant axis wins so diagonals resolve to one intent. Only *downward* dismisses; upward is left free for a future action. `touchAction: "none"` on the frame is required, or iOS claims vertical drags for scroll before Motion sees them.
 
 **[2026-09-08] Story duration** — `STORY_DURATION_MS = 5000`, Instagram's pacing. The active progress segment animates 0→100% linearly over it, keyed on the active index so it restarts from empty on every advance rather than sliding across from the previous segment.
 
