@@ -43,6 +43,12 @@ Filter-on-read (load + interval) rather than a real per-story timer/deletion. Si
 **[decided 2026-09-08] Clock is injected, never read internally**
 Every function in `lib/` takes `now: number` rather than calling `Date.now()`. Keeps `expiry.ts` pure and makes the exact-24h boundary testable without fake timers. Components pass `Date.now()` at the edge.
 
+**[decided 2026-09-08] Viewer takes the list plus a start index, not a story**
+`StoryViewer` receives `stories` and `startIndex` (null when closed) so it can sequence. The tray is the only component that knows a story's position, so it captures the index and `StoryAvatar` just reports that it was tapped. The index is never assumed in range — the list can shrink underneath the viewer when a story expires mid-view.
+
+**[decided 2026-09-08] Progress fill animates outside React**
+`StoryProgressBar` takes `durationMs` and lets Motion drive the width, rather than accepting a 0-1 `progress` pushed from a timer — that would be ~60 renders/second for a cosmetic fill. Trade-off: the fill isn't readable from tests, so auto-advance is asserted via the timer and the rendered image.
+
 **[decided 2026-09-08] Full storage throws rather than evicting**
 `writeStories` raises `StorageFullError` when the quota is exhausted. PRODUCT.md's mitigation is resize-before-store, not auto-delete — silently dropping a user's story to make room is worse than an honest failure the add-story flow can show.
 
@@ -94,7 +100,9 @@ passed as a prop across the server/client edge.
 | `components/StoryTray.test.tsx` | RTL tests covering all three tray components |
 | `components/StoryViewer.tsx` | Full-screen Dialog on `viewerTheme` — image, progress bar, close |
 | `components/StoryProgressBar.tsx` | Segmented bar, one segment per story, partial fill on the active one |
-| `components/StoryViewer.test.tsx` | RTL tests — open/closed, image, close button, Escape, aria |
+| `components/StoryViewer.test.tsx` | RTL tests — open/closed, navigation, auto-advance, aria |
+| `components/StoryTapZones.tsx` | Invisible prev/next targets over the frame, 1:2 flex split |
+| `hooks/useStoryPlayback.ts` | Viewer index + 5s auto-advance timer, `STORY_DURATION_MS` |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

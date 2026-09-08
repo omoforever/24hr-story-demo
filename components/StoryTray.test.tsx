@@ -59,12 +59,14 @@ describe("StoryTray", () => {
 
   it("opens the story that was tapped, not just the first one", async () => {
     const onOpenStory = vi.fn();
-    const second = storyWithId("second");
-    renderTray({ stories: [storyWithId("first"), second], onOpenStory });
+    renderTray({
+      stories: [storyWithId("first"), storyWithId("second")],
+      onOpenStory,
+    });
 
     await userEvent.click(screen.getAllByRole("button", { name: "Open story" })[1]);
 
-    expect(onOpenStory).toHaveBeenCalledWith(second);
+    expect(onOpenStory).toHaveBeenCalledWith(1);
   });
 
   it("disables adding while a story is being saved", () => {

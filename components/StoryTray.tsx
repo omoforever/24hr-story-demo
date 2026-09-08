@@ -9,7 +9,7 @@ import { StoryAvatar } from "./StoryAvatar";
 type StoryTrayProps = {
   stories: Story[];
   onAddStory: (file: File) => void;
-  onOpenStory?: (story: Story) => void;
+  onOpenStory?: (index: number) => void;
   isBusy?: boolean;
 };
 
@@ -38,7 +38,7 @@ export function StoryTray({
       <AddStoryButton onSelect={onAddStory} isBusy={isBusy} />
 
       <AnimatePresence initial={false}>
-        {stories.map((story) => (
+        {stories.map((story, index) => (
           <motion.div
             key={story.id}
             initial={{ opacity: 0, scale: 0.8 }}
@@ -47,7 +47,7 @@ export function StoryTray({
             transition={{ duration: 0.2 }}
             style={{ flexShrink: 0 }}
           >
-            <StoryAvatar story={story} onOpen={onOpenStory} />
+            <StoryAvatar story={story} onOpen={() => onOpenStory?.(index)} />
           </motion.div>
         ))}
       </AnimatePresence>

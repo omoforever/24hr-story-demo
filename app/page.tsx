@@ -9,13 +9,12 @@ import Typography from "@mui/material/Typography";
 import { StoryTray } from "@/components/StoryTray";
 import { StoryViewer } from "@/components/StoryViewer";
 import { useStories } from "@/hooks/useStories";
-import { Story } from "@/types/story";
 
 export default function Home() {
   const { stories, addStory, isLoaded } = useStories();
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [openStory, setOpenStory] = useState<Story | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   async function handleAddStory(file: File) {
     setIsBusy(true);
@@ -49,7 +48,7 @@ export default function Home() {
       <StoryTray
         stories={stories}
         onAddStory={handleAddStory}
-        onOpenStory={setOpenStory}
+        onOpenStory={setOpenIndex}
         isBusy={isBusy}
       />
 
@@ -59,7 +58,11 @@ export default function Home() {
         </Typography>
       )}
 
-      <StoryViewer story={openStory} onClose={() => setOpenStory(null)} />
+      <StoryViewer
+        stories={stories}
+        startIndex={openIndex}
+        onClose={() => setOpenIndex(null)}
+      />
 
       <Snackbar
         open={error !== null}
