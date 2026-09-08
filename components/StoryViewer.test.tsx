@@ -66,6 +66,20 @@ describe("StoryViewer", () => {
       "Story 2 of 3",
     );
   });
+
+  it("closes when the story being watched expires out from under it", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(
+      <StoryViewer stories={stories} startIndex={2} onClose={onClose} />,
+    );
+
+    // The expiry sweep prunes the list while the viewer is open on its last entry.
+    rerender(
+      <StoryViewer stories={[stories[0]]} startIndex={2} onClose={onClose} />,
+    );
+
+    expect(onClose).toHaveBeenCalled();
+  });
 });
 
 describe("StoryViewer navigation", () => {

@@ -43,6 +43,12 @@ Filter-on-read (load + interval) rather than a real per-story timer/deletion. Si
 **[decided 2026-09-08] Clock is injected, never read internally**
 Every function in `lib/` takes `now: number` rather than calling `Date.now()`. Keeps `expiry.ts` pure and makes the exact-24h boundary testable without fake timers. Components pass `Date.now()` at the edge.
 
+**[decided 2026-09-08] Live expiry is a re-read, not separate logic**
+`useStories` re-reads storage on a 60s interval and on `visibilitychange`; `readStories` already prunes and persists, so there is no second expiry code path to keep in sync. The refresh returns the *existing* array when nothing expired, so the tray doesn't re-render every minute. Visibility matters because browsers throttle background timers, which is the drift risk PRODUCT.md names.
+
+**[decided 2026-09-08] A story expiring mid-view closes the viewer**
+Rather than clamping the index to the shortened list, which would drop the viewer onto a story the user didn't choose.
+
 **[decided 2026-09-08] Viewer takes the list plus a start index, not a story**
 `StoryViewer` receives `stories` and `startIndex` (null when closed) so it can sequence. The tray is the only component that knows a story's position, so it captures the index and `StoryAvatar` just reports that it was tapped. The index is never assumed in range — the list can shrink underneath the viewer when a story expires mid-view.
 
@@ -105,6 +111,7 @@ passed as a prop across the server/client edge.
 | `hooks/useStoryPlayback.ts` | Viewer index + 5s auto-advance timer, `STORY_DURATION_MS` |
 | `hooks/useStorySwipe.ts` | Reads Motion drag end into navigate/dismiss, plus click suppression |
 | `hooks/useStorySwipe.test.ts` | Unit tests — direction, thresholds, diagonals, click suppression |
+| `hooks/useStories.test.ts` | Unit tests — hydration, live expiry sweep, visibility re-check |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

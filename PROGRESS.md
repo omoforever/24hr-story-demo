@@ -4,9 +4,31 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Everything in the core product works: post a photo, tap or swipe through the sequence, auto-
-advance, swipe down to dismiss, survives a reload, expires at 24h on read. Verified on laptop and
-phone. 58 tests green. Two tickets left: **Expiry enforcement live** and the **Responsive pass**.
+Feature complete bar the responsive pass: post a photo, tap or swipe through the sequence, auto-
+advance, swipe down to dismiss, and stories now disappear on their own while the app is open.
+Verified on laptop and phone. 66 tests green. One ticket left: **Responsive pass**.
+
+---
+
+## 2026-09-08 — Expiry enforcement live
+
+A 60s interval in `useStories` plus a `visibilitychange` re-check, and a viewer guard.
+
+- **No new expiry logic.** `readStories` already prunes and persists, so the sweep is just a
+  re-read on a timer. That design decision from ticket 2 paid off here.
+- **`refresh` returns the existing array when nothing expired.** Without that identity check,
+  every tick hands React a fresh array and the tray re-renders — and `AnimatePresence`
+  re-evaluates — once a minute forever, for nothing.
+- **`visibilitychange` as well as the interval**, because browsers throttle background timers
+  hard; a tab left open overnight would otherwise come back minutes stale. This is the drift
+  PRODUCT.md lists as a risk, now actually addressed rather than just mitigated by the interval.
+- **The viewer closes if the story being watched expires.** Clamping the index instead would drop
+  you onto a story you didn't choose, mid-sequence.
+
+Verification note: live expiry can't be observed without waiting 24h, so `STORY_LIFETIME_MS` was
+temporarily dropped to 60s (and the interval to 5s) to watch a story vanish from the tray on
+device, then both restored. Worth knowing the `expiryFor` test fails while that's in place — it's
+pinned to the real 24h constant, which is exactly what you want from it.
 
 ---
 
