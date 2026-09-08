@@ -37,8 +37,14 @@ Stored under a single `localStorage` key (e.g. `stories`) as a JSON array.
 
 ## Key decisions
 
-**[decide at build time] Expiry checking strategy**
-Filter-on-read (load + interval) rather than a real per-story timer/deletion. Simpler, survives reloads and closed tabs without needing background sync.
+**[decided 2026-09-08] Expiry checking strategy**
+Filter-on-read (load + interval) rather than a real per-story timer/deletion. Simpler, survives reloads and closed tabs without needing background sync. `readStories` persists the prune so expired stories can't reappear on reload, and skips the rewrite when nothing was dropped.
+
+**[decided 2026-09-08] Clock is injected, never read internally**
+Every function in `lib/` takes `now: number` rather than calling `Date.now()`. Keeps `expiry.ts` pure and makes the exact-24h boundary testable without fake timers. Components pass `Date.now()` at the edge.
+
+**[decided 2026-09-08] Full storage throws rather than evicting**
+`writeStories` raises `StorageFullError` when the quota is exhausted. PRODUCT.md's mitigation is resize-before-store, not auto-delete — silently dropping a user's story to make room is worse than an honest failure the add-story flow can show.
 
 **[decide at build time] Resize implementation**
 Canvas-based resize before encoding, to respect the 1080×1920 cap and keep localStorage usage down.
@@ -75,6 +81,10 @@ passed as a prop across the server/client edge.
 | `app/page.test.tsx` | Render smoke test for the home route |
 | `app/globals.css` | Only what the MUI theme can't express (full-height html/body, overflow-x guard) |
 | `types/story.ts` | `Story` type + `STORY_LIFETIME_MS` |
+| `lib/expiry.ts` | Pure expiry maths — `expiryFor`, `isExpired`, `filterActive`, `msUntilExpiry` |
+| `lib/storage.ts` | `localStorage` read/write, prune-on-read, `StorageFullError` on quota |
+| `lib/expiry.test.ts` | Unit tests, including the exact-24h boundary |
+| `lib/storage.test.ts` | Unit tests — round trip, corrupt data, prune persistence, quota |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

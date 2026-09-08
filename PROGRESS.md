@@ -4,8 +4,45 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Scaffold done. App builds, type-checks, lints and tests clean; empty themed page renders at
-`localhost:3000`. Next up: `lib/storage.ts` + `lib/expiry.ts`.
+Storage layer done and tested (26 tests green). Nothing renders stories yet — the page is still
+the empty header. Next up: `lib/image.ts` (file → canvas resize → base64).
+
+---
+
+## 2026-09-08 — Story data model + storage utils
+
+`lib/expiry.ts` and `lib/storage.ts`, 25 unit tests between them.
+
+Shape of it:
+
+- **Clock is always injected.** Every function takes `now: number`; nothing calls `Date.now()`
+  internally. That's what makes the exact-24h boundary testable without fake timers.
+- **`expiry.ts` is pure** — no storage, no clock. `storage.ts` depends on it, never the reverse.
+- **Prune-on-read persists.** `readStories` rewrites storage when it drops something, so expired
+  stories can't reappear after a reload. The rewrite is skipped when nothing expired — ticket 9's
+  interval would otherwise re-serialise every base64 image on every tick.
+- **Reads never throw, writes can.** A corrupt or blocked store returns `[]` so the tray still
+  renders; a failed *save* throws `StorageFullError`, because silently losing a photo is worse.
+
+Decisions taken:
+
+- **Quota → typed error, not eviction.** PRODUCT.md's mitigation is "resize before storing", not
+  "auto-delete", so `writeStories` throws `StorageFullError` (with a user-facing message) rather
+  than dropping the oldest story to make room. The add-story flow surfaces it.
+- **Boundary is `expiresAt < now`**, per ARCHITECTURE.md — a story sitting exactly on its expiry
+  instant is still active. Pinned by tests at -1ms, exactly, and +1ms.
+- **Malformed entries are dropped individually**, not treated as a whole-store corruption, so one
+  bad record can't wipe the rest.
+
+Notes:
+
+- `window.localStorage` *throws* in Safari private mode rather than returning null, so the access
+  is inside a try/catch — an SSR-only `typeof window` guard isn't enough.
+- `readStories` both reads and writes, which strains single-responsibility. Kept deliberately:
+  splitting it would let a caller forget to persist the prune.
+- Also fixed here: `allowedDevOrigins` in `next.config.ts`. Next 16 blocks HMR as a cross-origin
+  request when the dev server is opened from a phone on the LAN — the page loads but never
+  hot-reloads. Wildcarded across the subnet since the host IP is DHCP-assigned.
 
 ---
 
