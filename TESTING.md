@@ -17,6 +17,10 @@ Every code file gets a test, using whichever library fits that file's layer. Tes
 
 - Pure type files with no logic
 - Config files (`next.config.js`, etc.)
+- `lib/image.ts` — [2026-09-08] canvas isn't implemented in jsdom, so testing it means either
+  mocking the canvas API or pulling in the `canvas` package. Neither is worth it for one file on
+  a project this size. Verified by eye instead: upload a landscape photo, a portrait one, and a
+  phone photo (EXIF rotation), and confirm each looks right in the viewer.
 
 ## Tools
 

@@ -85,6 +85,13 @@ passed as a prop across the server/client edge.
 | `lib/storage.ts` | `localStorage` read/write, prune-on-read, `StorageFullError` on quota |
 | `lib/expiry.test.ts` | Unit tests, including the exact-24h boundary |
 | `lib/storage.test.ts` | Unit tests — round trip, corrupt data, prune persistence, quota |
+| `lib/image.ts` | `File` → `createImageBitmap` → canvas resize → JPEG base64, EXIF-aware |
+| `hooks/useStories.ts` | Active story list + `addStory`; hydrates from storage after mount |
+| `components/StoryTray.tsx` | Horizontal scroll row — add tile then one avatar per story |
+| `components/StoryAvatar.tsx` | Circular thumbnail with gradient (unseen) or grey (seen) ring |
+| `components/AddStoryButton.tsx` | "+" tile wrapping a hidden file input |
+| `components/storyTrayLayout.ts` | Shared `AVATAR_SIZE` so the tile and avatars stay aligned |
+| `components/StoryTray.test.tsx` | RTL tests covering all three tray components |
 | `vitest.config.mts` | jsdom + React plugin, `@/*` alias mirroring tsconfig |
 | `vitest.setup.ts` | jest-dom matchers, RTL cleanup between tests |
 

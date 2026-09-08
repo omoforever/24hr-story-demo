@@ -4,8 +4,46 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Storage layer done and tested (26 tests green). Nothing renders stories yet — the page is still
-the empty header. Next up: `lib/image.ts` (file → canvas resize → base64).
+You can post a photo and see it in the tray, and it survives a reload. Verified on a real phone.
+32 tests green. Tapping an avatar does nothing yet — that's the viewer. Next up: **Story viewer
+(static)**.
+
+---
+
+## 2026-09-08 — Image handling, story tray, add story flow
+
+Three tickets in one pass, since none of them is verifiable alone: `lib/image.ts` needs a picker
+to receive a file, and the picker needs a tray to live in.
+
+Built:
+
+- `lib/image.ts` — `createImageBitmap` → canvas → JPEG base64.
+- `hooks/useStories.ts` — the plain hook (no Context, no store), owning the list and `addStory`.
+- `components/` — `StoryTray`, `StoryAvatar`, `AddStoryButton`, plus a shared `AVATAR_SIZE`.
+- `app/page.tsx` — now a client component, wiring the hook to the tray and surfacing errors.
+
+Decisions:
+
+- **JPEG at 0.8, not PNG.** A PNG of a camera photo can be several times larger and localStorage
+  is the binding constraint. Transparency is irrelevant for photos.
+- **`createImageBitmap` with `imageOrientation: "from-image"`** rather than `<img>` + object URL.
+  Fewer moving parts, and it's the one-line fix for iPhone photos landing sideways.
+- **`image.ts` is test-exempt**, recorded in TESTING.md — canvas isn't in jsdom, and mocking it
+  or adding the `canvas` package wasn't worth it for one file. Verified by eye on device instead.
+- **Tray components are tested through the tray**, one file, behaviour not implementation.
+
+Snags worth remembering:
+
+- **`crypto.randomUUID` is undefined on the phone.** It requires a secure context, and the dev
+  server is plain http on a LAN IP. It works on localhost (special-cased), so this would have
+  passed every desktop test and failed only on a real device. `createId` falls back.
+- **React's new `set-state-in-effect` lint rule** fires on the hydration read in `useStories`.
+  Suppressed on that one line with the reasoning inline: localStorage can't be read during render,
+  and `useSyncExternalStore` needs a cached snapshot to avoid looping on a fresh array.
+- **`next.config.ts` changes need a server restart.** Spent a while on a dead tray on mobile —
+  the running dev server predated the `allowedDevOrigins` edit by two seconds, so client JS was
+  blocked cross-origin. The page server-rendered fine and nothing was interactive, which is the
+  signature of hydration never happening.
 
 ---
 
