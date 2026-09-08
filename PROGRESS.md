@@ -4,9 +4,29 @@ Running log, newest at top. One entry per session or meaningful chunk of work �
 
 ## Current state
 
-Feature complete bar the responsive pass: post a photo, tap or swipe through the sequence, auto-
-advance, swipe down to dismiss, and stories now disappear on their own while the app is open.
-Verified on laptop and phone. 66 tests green. One ticket left: **Responsive pass**.
+Feature complete. Every flow in PRODUCT.md works and has been verified on a real phone and a
+laptop, portrait and landscape, 320px to full desktop width. 66 tests green. All that's left is
+the **Test pass** — a coverage review rather than a build, since each ticket shipped with tests.
+
+---
+
+## 2026-09-08 — Responsive pass
+
+Mostly a verification ticket, as expected from building mobile-first — but it turned up two real
+issues that only appear in situations we'd never tested.
+
+- **Landscape flattened the viewer.** The frame was `width: 100%; maxWidth: 420; aspectRatio:
+  9/16; maxHeight: 100%`. On a short viewport `max-height` wins against `aspect-ratio`, so the
+  frame became a squat landscape box with the photo letterboxed inside. Fixed by capping width by
+  available height instead: `min(420px, calc(100dvh * 9 / 16))`. Still no media query. `dvh`
+  rather than `vh` so collapsing mobile browser chrome doesn't clip it.
+- **Safe-area insets were missing** — a bug introduced back in the scaffold. `layout.tsx` sets
+  `viewportFit: "cover"` so the viewer can reach under the notch, but nothing ever added the
+  matching padding, so on a notched iPhone the progress bar sat under the status bar. The viewer
+  header now uses `calc(12px + env(safe-area-inset-top))`.
+
+The tray needed no changes: 72px rings with 12px gaps scroll horizontally at 320px, and
+`Container maxWidth="sm"` already centres it on desktop.
 
 ---
 
